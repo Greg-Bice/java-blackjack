@@ -3,6 +3,8 @@ package pkgCore;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import pkgEnum.eRank;
+
 public class Hand {
 
 	private int iScore;
@@ -17,30 +19,32 @@ public class Hand {
 	{
 		int [] iScore = new int[2];
 		
-		iScore[0] = 5;
-		iScore[1] = 10;
+		iScore[0] = 0;
+		iScore[1] = 0;
 		
 		Collections.sort(cards);
 		
-		
+		boolean hasAce = false;
 		for (Card c: cards)
 		{
-			//	TODO: Determine the score.  
-			//			Cards:
-			//			2-3-4 - score = 11
-			//			5-J-Q - score = 25
-			//			5-6-7-2 - score = 20
-			//			J-Q	- score = 20
-			//			8-A = score = 9 or 19
-			//			4-A = score = 5 or 15
+			
+			iScore[0] += c.getRank().getMin();
+			if (c.getRank() == eRank.ACE ) { 
+				hasAce = true;
+			}
+			
 		}
+		
+		iScore[1] = (hasAce) ? iScore[0] + 10 : iScore[0];
+		
+		this.SetHandScore( iScore );
 		
 		return iScore;
 	}
 	
 	public void Draw(Deck d)
 	{
-		//	TODO: add a card to 'cards' from a card drawn from Deck d
+		this.AddCard( d.Draw() );
 	}
 	
 	private void AddCard(Card c)
@@ -48,4 +52,42 @@ public class Hand {
 		cards.add(c);
 	}
 	
+	public boolean isBlackjack() {
+		
+		int[] iScore = ScoreHand();
+		
+		return ( ( iScore[1] == 21 ) && ( cards.size() == 2 ) );
+
+	}
+	
+	public boolean bCanDealerHit() {
+		boolean bDraw=false;
+		for(int iScore : ScoreHand())
+		{
+			if (iScore>=17)
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean bCanPlayerDrew() 
+	{
+		for (int iScore : ScoreHand())
+		{
+			if(iScore<21)
+				return true;
+		}
+		
+		return false;
+		
+	}
+	
+	public void SetHandScore( int[] Scores)
+	{
+		this.iScore = Scores[0];
+		
+		if( Scores[1]<=21 )
+			iScore = Scores[1];
+	}
+		
 }
